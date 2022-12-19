@@ -55,7 +55,7 @@ class FeedItem {
       enclosureElement = node.findElements('enclosure').single;
     } catch (e) {}
 
-    FeedEnclosure enclosure = FeedEnclosure('assets/images/no_image.png','125','40');
+    FeedEnclosure enclosure = FeedEnclosure('','','');
     if (enclosureElement != null) {
       enclosure = new FeedEnclosure.fromXml(enclosureElement);
     }
@@ -66,7 +66,7 @@ class FeedItem {
       mediaContentElement = node.findElements('media:content').first;
     } catch (e) {}
 
-    FeedEnclosure mediaContent = FeedEnclosure('assets/images/no_image.png','125','40');
+    FeedEnclosure mediaContent = FeedEnclosure('','','');
     if (mediaContentElement != null) {
       mediaContent = new FeedEnclosure.fromXml(mediaContentElement);
     }
@@ -77,7 +77,7 @@ class FeedItem {
       mediaThumbnailElement = node.findElements('media:thumbnail').first;
     } catch (e) {}
 
-    FeedEnclosure mediaThumbnail = FeedEnclosure('assets/images/no_image.png','125','40');
+    FeedEnclosure mediaThumbnail = FeedEnclosure('','','');
     if (mediaThumbnailElement != null) {
       mediaThumbnail = new FeedEnclosure.fromXml(mediaThumbnailElement);
     }

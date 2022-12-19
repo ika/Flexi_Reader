@@ -19,8 +19,6 @@ import '../models/jmodel.dart';
 // news.dart
 
 String feedUrl = '';
-int feedID = 0;
-String webUrl = '';
 
 Feed _feed = Feed('', '', ''); //.initializeFeed();
 
@@ -48,10 +46,6 @@ class _NewsPageState extends State<NewsPage> {
     _refreshKey = GlobalKey<RefreshIndicatorState>();
     updateTitle(widget.title);
     getSharedPrefsFeedLink();
-  }
-
-  bool _validateURL(String feedUrl) {
-    return Uri.parse(feedUrl).isAbsolute;
   }
 
   String _removeLeadingChars(String xmlString) {
@@ -133,7 +127,7 @@ class _NewsPageState extends State<NewsPage> {
   FutureOr onReturnFromFeeds(dynamic value) {
     final List<JModel> decodedData = JModel.decode(value);
 
-    feedUrl = decodedData.first.link as String;
+    feedUrl = decodedData.first.link.toString();
 
     if (_validateURL(feedUrl)) {
       updateTitle(loadingFeedMsg);
@@ -204,7 +198,8 @@ class _NewsPageState extends State<NewsPage> {
 }
 
 class ItemTile extends StatelessWidget {
-  final String imageUrl, title, desc, webUrl, pDate, fTitle;
+  final String imageUrl, title, desc, pDate, fTitle;
+  final String webUrl;
 
   ItemTile(
       {required this.imageUrl, // picture url
@@ -218,8 +213,7 @@ class ItemTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        // _launchInBrowser(webUrl);
-        debugPrint('LAUNCH URL');
+        _launchInBrowser(webUrl);
       },
       child: Container(
         margin: EdgeInsets.only(bottom: 8),
@@ -264,18 +258,16 @@ class ItemTile extends StatelessWidget {
   }
 }
 
-// Future<void> _launchInBrowser(String url) async {
-//   if (await canLaunchUrl(url)) {
-//     await launchUrl(
-//       url,
-//       // forceSafariVC: false,
-//       // forceWebView: false,
-//       // headers: <String, String>{'my_header_key': 'my_header_value'},
-//     );
-//   } else {
-//     throw 'Could not launch $url';
-//   }
-// }
+Future<void> _launchInBrowser(String url) async {
+  if (url.isNotEmpty) {
+    Uri parsedUrl = Uri.parse(url);
+    if (!await launchUrl(parsedUrl)) {
+      throw 'Could not launch $parsedUrl';
+    }
+  } else {
+    throw 'URL $url is empty';
+  }
+}
 
 String utf8convert(String stringtext) {
   // Uint8List bytes = stringtext as Uint8List; // bytes with unknown encoding
@@ -297,19 +289,22 @@ String utf8convert(String stringtext) {
 //   return CharsetDetector.autoDecode(bytes.buffer.asUint8List());
 //return CharsetDetector.autoDecode(bytes.buffer.asUint8List());
 
+bool _validateURL(String feedUrl) {
+  return Uri.parse(feedUrl).isAbsolute;
+}
+
 showImage(BuildContext context, String imageUrl) {
-  debugPrint('IMAGEURL $imageUrl');
-  if (imageUrl.isNotEmpty) {
+  //debugPrint('IMAGEURL $imageUrl');
+  if (_validateURL(imageUrl)) {
     //final String placeholderImg = 'assets/images/no_image.png';
     return Container(
       margin: const EdgeInsets.all(8),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(6),
         child: CachedNetworkImage(
-          imageUrl: imageUrl,
-          placeholder: (context, url) => CircularProgressIndicator(),
-          errorWidget: (context, url, error) => Icon(Icons.error),
-        ),
+            imageUrl: imageUrl,
+            placeholder: (context, url) => CircularProgressIndicator(),
+            errorWidget: (context, url, error) => const Icon(Icons.error)),
       ),
     );
   } else {
@@ -318,21 +313,8 @@ showImage(BuildContext context, String imageUrl) {
 }
 
 String getImageUrl(item) {
-
   // if (item.thumbnail.toString().isNotEmpty) {
   //   return item.thumbnail;
-  // }
-
-  if (item.enclosure != null) {
-    if (item.enclosure.url != null) {
-      return item.enclosure.url;
-    }
-  }
-
-  // if (item.mediaContent != null) {
-  //   if (item.mediaContent.url != null) {
-  //     return item.mediaContent.url;
-  //   }
   // }
 
   // if (item.mediaThumbnail != null) {
@@ -340,6 +322,12 @@ String getImageUrl(item) {
   //     return item.mediaThumbnail.url;
   //   }
   // }
+
+  if (item.enclosure != null) {
+    if (item.enclosure.url != null) {
+      return item.enclosure.url;
+    }
+  }
 
   if (item.description != null) {
     var document = parse(item.description);
@@ -349,13 +337,18 @@ String getImageUrl(item) {
     }
   }
 
-  // // last resort - use feed image
-  if (_feed.image != null) {
-    if (_feed.image?.url != null) {
-      return _feed.image?.url as String;
+  if (item.mediaContent != null) {
+    if (item.mediaContent.url != null) {
+      return item.mediaContent.url;
     }
   }
 
-  return 'https://via.placeholder.com/300x150';
-  
+  // last resort - use feed image
+  // if (_feed.image != null) {
+  //   if (_feed.image?.url != null) {
+  //     return _feed.image?.url as String;
+  //   }
+  // }
+
+  return ''; //'https://via.placeholder.com/300x150';
 }
