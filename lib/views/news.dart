@@ -8,7 +8,6 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:html/parser.dart';
 import 'package:url_launcher/url_launcher.dart';
-
 import '../views/feeds.dart';
 import '../models/jmodel.dart';
 
@@ -170,23 +169,20 @@ class _NewsPageState extends State<NewsPage> {
             padding: EdgeInsets.symmetric(horizontal: 8),
             child: Column(
               children: [
-                Container(
-                  padding: EdgeInsets.only(top: 8),
-                  child: ListView.builder(
-                    itemCount: _feed.items != null ? _feed.items!.length : 0,
-                    shrinkWrap: true,
-                    physics: ClampingScrollPhysics(),
-                    itemBuilder: (BuildContext context, int index) {
-                      final item = _feed.items![index];
-                      return ItemTile(
-                          title: item.title as String,
-                          imageUrl: getImageUrl(item),
-                          desc: _parseHtmlString(item.description as String),
-                          webUrl: item.link as String, // web page url
-                          pDate: item.pubDate as String,
-                          fTitle: _feed.title as String);
-                    },
-                  ),
+                ListView.builder(
+                  itemCount: _feed.items != null ? _feed.items!.length : 0,
+                  shrinkWrap: true,
+                  physics: ClampingScrollPhysics(),
+                  itemBuilder: (BuildContext context, int index) {
+                    final item = _feed.items![index];
+                    return ItemTile(
+                        title: item.title as String,
+                        imageUrl: getImageUrl(item),
+                        desc: _parseHtmlString(item.description as String),
+                        webUrl: item.link as String, // web page url
+                        pDate: item.pubDate as String,
+                        fTitle: _feed.title as String);
+                  },
                 )
               ],
             ),
@@ -222,35 +218,40 @@ class ItemTile extends StatelessWidget {
           //   borderRadius: BorderRadius.circular(15.0),
           // ),
           elevation: 10,
-          child: Column(
-            children: [
-              showImage(context, imageUrl),
-              Container(
+          child: Container(
+            margin: const EdgeInsets.all(10),
+            child: Column(
+              children: [
+                showImage(context, imageUrl),
+                Container(
                   alignment: Alignment.topLeft,
-                  margin: const EdgeInsets.all(8),
+                  margin: const EdgeInsets.only(top: 8),
                   child: Text(
                     utf8convert(title), // Title
                     style: TextStyle(
                         fontSize: 18,
                         color: Colors.black87,
                         fontWeight: FontWeight.w600),
-                  )),
-              Container(
+                  ),
+                ),
+                Container(
                   alignment: Alignment.topLeft,
-                  margin: const EdgeInsets.only(left: 8, right: 8, bottom: 8),
+                  margin: const EdgeInsets.only(top: 4),
                   child: Text(
                     utf8convert(desc), // Description
                     style: TextStyle(fontSize: 16, color: Colors.black54),
-                  )),
-              Container(
-                alignment: Alignment.topRight,
-                margin: const EdgeInsets.only(left: 8, right: 8, bottom: 8),
-                child: Text(
-                  pDate.trim(), // Pub date
-                  style: TextStyle(fontSize: 12, color: Colors.black54),
+                  ),
                 ),
-              )
-            ],
+                Container(
+                  alignment: Alignment.topRight,
+                  margin: const EdgeInsets.only(top: 4),
+                  child: Text(
+                    pDate.trim(), // Pub date
+                    style: TextStyle(fontSize: 12, color: Colors.black54),
+                  ),
+                )
+              ],
+            ),
           ),
         ),
       ),
@@ -298,7 +299,6 @@ showImage(BuildContext context, String imageUrl) {
   if (_validateURL(imageUrl)) {
     //final String placeholderImg = 'assets/images/no_image.png';
     return Container(
-      margin: const EdgeInsets.all(8),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(6),
         child: CachedNetworkImage(
